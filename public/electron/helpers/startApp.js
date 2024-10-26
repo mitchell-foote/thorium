@@ -4,6 +4,10 @@ const path = require("path");
 
 // Make the kiosk work better on slightly older computers
 app.commandLine.appendSwitch("ignore-gpu-blacklist", "true");
+
+// If the computer has a fancy graphics card, use it.
+app.commandLine.appendSwitch("force_high_performance_gpu", "true");
+
 const cert = fs.existsSync(
   `${require("os").homedir()}/Documents/thorium/server.cert`,
 )
