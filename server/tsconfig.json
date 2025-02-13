@@ -1,16 +1,16 @@
 {
   "compilerOptions": {
-    "module": "NodeNext",
+    "module": "CommonJS",
     "esModuleInterop": true,
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es6",
+    "target": "ESNext",
     "skipLibCheck": true,
     "lib":["ES2019"],
 
     // TODO: Turn this on when we get enough coverage
     "noImplicitAny": false,
-    "moduleResolution": "nodenext",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "sourceMap": false,
     "outDir": "../tempServer",

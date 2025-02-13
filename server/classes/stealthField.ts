@@ -13,8 +13,8 @@ interface StealthQuadrants {
 export default class StealthField extends System {
   class: "StealthField" = "StealthField";
   type: "StealthField" = "StealthField";
-  name: string;
-  wing: "left" | "right";
+  declare name: string;
+  declare wing: "left" | "right";
   charge: boolean;
   activated: boolean;
   state: boolean;

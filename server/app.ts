@@ -243,7 +243,7 @@ class Events extends EventEmitter {
   }
 }
 
-const App = new Events();
+const App : Events = new Events();
 
 // Handle events for App
 App.on("error", function (err) {

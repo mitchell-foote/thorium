@@ -1,5 +1,6 @@
 import App from "../app";
-import {gql, withFilter} from "apollo-server-express";
+import { gql } from "graphql-tag";
+import { withFilter } from "graphql-subscriptions";
 import {pubsub} from "../helpers/subscriptionManager";
 import GraphQLClient from "../helpers/graphqlClient";
 import request from "request";
@@ -366,14 +367,14 @@ const resolver = {
       resolve(rootValue) {
         return rootValue;
       },
-      subscribe: () => pubsub.asyncIterator("thoriumUpdate"),
+      subscribe: () => pubsub.asyncIterableIterator("thoriumUpdate"),
     },
     clockSync: {
       resolve() {
         return new Date();
       },
       subscribe: withFilter(
-        () => pubsub.asyncIterator("clockSync"),
+        () => pubsub.asyncIterableIterator("clockSync"),
         (rootValue, {clientId}) => rootValue.clientId === clientId,
       ),
     },

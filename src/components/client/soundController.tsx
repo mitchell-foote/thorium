@@ -1,6 +1,6 @@
-import React, {Fragment} from "react";
+import React, {Fragment, useEffect} from "react";
 import gql from "graphql-tag.macro";
-import {Subscription} from "react-apollo";
+import {useSubscription} from "@apollo/client";
 import {useSounds} from "../generic/SoundPlayer";
 
 const SOUND_SUB = gql`
@@ -39,9 +39,27 @@ const STOP_LOOPING = gql`
 const SoundController = React.memo<{clientId: string}>(
   ({clientId}) => {
     const {playSound, stopLooping, removeSound, removeAllSounds} = useSounds();
+    const soundSub = useSubscription(SOUND_SUB, {variables: {clientId}});
+    const cancelSounds = useSubscription(CANCEL_SOUNDS, {variables: {clientId}});
+    const cancelAllSounds = useSubscription(CANCEL_ALL_SOUNDS, {variables: {clientId}});
+    const cancelLooping = useSubscription(STOP_LOOPING, {variables: {clientId}});
+    useEffect(() => {
+      if (soundSub.data?.soundSub) {
+        playSound(soundSub.data?.soundSub)
+      };
+      if (cancelSounds.data?.cancelSound) {
+        removeSound(cancelSounds.data?.cancelSound)
+      };
+      if (cancelAllSounds.data?.cancelAllSounds) {
+        removeAllSounds()
+      };
+      if (cancelLooping.data?.cancelLoopingSounds) {
+        stopLooping()
+      };
+    })
     return (
       <Fragment>
-        <Subscription subscription={SOUND_SUB} variables={{clientId}}>
+        {/* <Subscription subscription={SOUND_SUB} variables={{clientId}}>
           {({data}: {data?: any}) => {
             if (data?.soundSub) playSound(data?.soundSub);
             return null;
@@ -64,7 +82,7 @@ const SoundController = React.memo<{clientId: string}>(
             removeAllSounds();
             return null;
           }}
-        </Subscription>
+        </Subscription> */}
       </Fragment>
     );
   },

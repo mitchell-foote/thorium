@@ -30,7 +30,7 @@ export default function processReport(report: string, system: System) {
   });
 
   // #[1 - 2]
-  const matches = returnReport.match(/#\[ ?([0-9]+) ?- ?([0-9]+) ?\]/gi) || [];
+  const matches: string[] = returnReport.match(/#\[ ?([0-9]+) ?- ?([0-9]+) ?\]/gi) || [];
   matches.forEach(m => {
     const index = returnReport.indexOf(m);
     returnReport = returnReport.replace(m, "");
@@ -52,7 +52,7 @@ export default function processReport(report: string, system: System) {
       returnReport,
       index,
       0,
-      randomFromList(strings).replace(/"/gi, ""),
+      (randomFromList(strings) as string).replace(/"/gi, ""),
     );
   });
 

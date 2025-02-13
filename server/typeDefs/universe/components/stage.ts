@@ -1,4 +1,5 @@
-import {gql} from "apollo-server-express";
+import { gql } from "graphql-tag";
+;
 import {setComponent, removeComponent} from "../setComponentHelper";
 import App from "../../../app";
 

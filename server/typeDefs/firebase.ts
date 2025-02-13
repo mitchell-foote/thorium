@@ -1,5 +1,5 @@
 import App from "../app";
-import { gql } from "apollo-server-express";
+import { gql } from "graphql-tag";
 import { pubsub } from "../helpers/subscriptionManager";
 
 const schema = gql`
@@ -254,7 +254,7 @@ const resolver = {
 
                 }
             },
-            subscribe: () => pubsub.asyncIterator("firebaseCurrentSelectionsUpdate")
+            subscribe: () => pubsub.asyncIterableIterator("firebaseCurrentSelectionsUpdate")
         }
     }
 }

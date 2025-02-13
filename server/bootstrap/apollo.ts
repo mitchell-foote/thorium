@@ -1,10 +1,5 @@
-import {
-  ApolloServer,
-  makeExecutableSchema,
-  ApolloServerExpressConfig,
-} from "apollo-server-express";
+
 import express from "express";
-import vanity from "./vanity";
 import https from "https";
 import http from "http";
 import path from "path";
@@ -13,29 +8,35 @@ import ipAddress from "../helpers/ipaddress";
 import {typeDefs, resolvers} from "../data";
 import chalk from "chalk";
 import url from "url";
-import paths from "../helpers/paths";
-import App from "../app";
+import {paths} from "../helpers/paths";
 // Load some other stuff
-import "../events";
-import "../processes";
-import {FieldNode, getOperationRootType, printSchema} from "graphql";
-import {getArgumentValues} from "graphql/execution/values";
-import {getFieldDef} from "graphql/execution/execute";
+import "../events/index";
+import "../processes/index";
+import {FieldNode, getOperationRootType, GraphQLField, printSchema} from "graphql";
+import {getArgumentValues} from "graphql";
+import {vanity} from "./vanity";
+import { WebSocketServer } from 'ws';
+import { useServer } from 'graphql-ws/lib/use/ws';
+import { ApolloServer } from "@apollo/server";
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import { expressMiddleware } from "@apollo/server/express4";
+import { makeExecutableSchema } from "@graphql-tools/schema";
+
 
 export const schema = makeExecutableSchema({
   typeDefs,
   resolvers,
   resolverValidationOptions: {
-    requireResolversForResolveType: false,
+    requireResolversForResolveType: "ignore",
   },
 });
-if (process.env.NODE_ENV === "development" && !process.env.CI) {
-  // Automatically generate the GraphQL schema and write it to file
-  // but only in development.
-  const schemaOutput = printSchema(schema);
+// if (process.env.NODE_ENV === "development" && !process.env.CI) {
+//   // Automatically generate the GraphQL schema and write it to file
+//   // but only in development.
+//   const schemaOutput = printSchema(schema);
 
-  fs.writeFileSync("./src/schema.graphql", schemaOutput);
-}
+//   fs.writeFileSync("./src/schema.graphql", schemaOutput);
+// }
 
 // TODO: Change app to the express type
 function responseForOperation(requestContext) {
@@ -48,81 +49,104 @@ function responseForOperation(requestContext) {
   // in 500 milliseconds, it just returns.
   const {
     context,
-    request: {variables},
+    request,
     operation,
+    operationName
   } = requestContext;
   if (operation.operation !== "mutation") return null;
-  const selection = operation.selectionSet.selections[0] as FieldNode;
-  const opName = selection.name.value;
-  const parentType = getOperationRootType(schema, operation);
-  const fieldDef = getFieldDef(schema, parentType, opName);
-  const args = getArgumentValues(
-    fieldDef,
-    operation.selectionSet.selections[0] as FieldNode,
-    variables,
-  );
 
-  // Figure out the context of the action
-  const {clientId} = context;
-  const client = App.clients.find(c => c.id === clientId);
-  // Handle any triggers before the event so we can capture data that
-  // the event might remove
-  const flight = App.flights.find(
-    f =>
-      f.id === (client && client.flightId) ||
-      (args.simulatorId && f.simulators.includes(args.simulatorId)),
-  );
-  const simulator = App.simulators.find(
-    s =>
-      s.id === (client && client.simulatorId) ||
-      (args.simulatorId && s.id === args.simulatorId),
-  );
-  // We really want to modify this read-only property
-  // @ts-ignore ts(2540)
-  requestContext.context = {
-    ...context,
-    flight: flight || context.flight,
-    simulator: simulator || context.simulator,
-    client,
-    isMutation: true,
-  };
+  if (request.operationName && schema.getMutationType()) {
+    const mutationFields = schema.getMutationType()?.getFields();
 
-  // If there is a direct mutation resolver, execute that.
-  // This is now the preferred way to execute mutations
-  if (resolvers.Mutation[opName]) {
-    // The whole point of this is so we can still
-    // trigger handle event, so lets do that.
-    App.handleEvent(
-      {
-        ...args,
-        cb: () => {},
-      },
-      opName,
-      requestContext.context,
-    );
-    // Returning null means it executes
-    // the built-in mutation resolver
-    return null;
+    // Check if the operation exists in the mutation type
+    if (mutationFields && mutationFields[operationName]) {
+      const mutationField = mutationFields[operationName];
+      const args = request.variables;
+
+      console.log(`Intercepted Mutation: ${operationName}`);
+      console.log("Arguments from variables:", args);
+
+      // Use getArgumentValues to extract the argument values for the mutation
+      const argumentValues = getArgumentValues(
+        mutationField as GraphQLField<any, any>,
+        request.variables,
+      );
+
+      console.log("Extracted Arguments using getArgumentValues:", argumentValues);
+
+    }
   }
-  return new Promise<any>(resolve => {
-    // Execute the old legacy event handler system.
-    let timeout = null;
-    App.handleEvent(
-      {
-        ...args,
-        cb: (a: any) => {
-          clearTimeout(timeout);
-          resolve({data: {[opName]: a}});
-        },
-      },
-      opName,
-      requestContext.context,
-    );
-    timeout = setTimeout(() => { resolve({ error: "fail", data: {} }) }, 500);
-  });
-}
+  // const selection = operation.selectionSet.selections[0] as FieldNode;
+  // const opName = selection.name.value;
+  // const parentType = getOperationRootType(schema, operation);
+  // const fieldDef = getFieldDef(schema, parentType, opName);
+  // const args = getArgumentValues(
+  //   fieldDef,
+  //   operation.selectionSet.selections[0] as FieldNode,
+  //   variables,
+  // );
 
-export default (
+  // // Figure out the context of the action
+  // const {clientId} = context;
+  // const client = App.clients.find(c => c.id === clientId);
+  // // Handle any triggers before the event so we can capture data that
+  // // the event might remove
+  // const flight = App.flights.find(
+  //   f =>
+  //     f.id === (client && client.flightId) ||
+  //     (args.simulatorId && f.simulators.includes(args.simulatorId)),
+  // );
+  // const simulator = App.simulators.find(
+  //   s =>
+  //     s.id === (client && client.simulatorId) ||
+  //     (args.simulatorId && s.id === args.simulatorId),
+  // );
+  // // We really want to modify this read-only property
+  // // @ts-ignore ts(2540)
+  // requestContext.context = {
+  //   ...context,
+  //   flight: flight || context.flight,
+  //   simulator: simulator || context.simulator,
+  //   client,
+  //   isMutation: true,
+  // };
+
+  // // If there is a direct mutation resolver, execute that.
+  // // This is now the preferred way to execute mutations
+  // if (resolvers.Mutation[opName]) {
+  //   // The whole point of this is so we can still
+  //   // trigger handle event, so lets do that.
+  //   App.handleEvent(
+  //     {
+  //       ...args,
+  //       cb: () => {},
+  //     },
+  //     opName,
+  //     requestContext.context,
+  //   );
+  //   // Returning null means it executes
+  //   // the built-in mutation resolver
+  //   return null;
+  // }
+  // return new Promise<any>(resolve => {
+  //   // Execute the old legacy event handler system.
+  //   let timeout = null;
+  //   App.handleEvent(
+  //     {
+  //       ...args,
+  //       cb: (a: any) => {
+  //         clearTimeout(timeout);
+  //         resolve({data: {[opName]: a}});
+  //       },
+  //     },
+  //     opName,
+  //     requestContext.context,
+  //   );
+  //   timeout = setTimeout(() => { resolve({ error: "fail", data: {} }) }, 500);
+  // });
+  return null;
+}
+export const apolloStartup = async (
   app: express.Application,
   SERVER_PORT: number,
   httpOnly: boolean,
@@ -130,30 +154,65 @@ export default (
 ) => {
   // Apply the mutations to App.js so we don't get circular dependency issues
   setMutations(resolvers.Mutation);
-  const graphqlOptions: ApolloServerExpressConfig = {
-    schema,
-    tracing: process.env.NODE_ENV !== "production",
-    introspection: true,
-    playground: true,
-    uploads: false,
-    plugins: [
-      {
-        requestDidStart() {
-          return {
-            responseForOperation,
-          };
-        },
-      },
-    ],
-    context: ({req, connection}) => ({
-      clientId: req?.headers.clientid || connection?.context.clientId,
-      core: req?.headers.core,
-    }),
-  };
-  const apollo = new ApolloServer(graphqlOptions);
-  apollo.applyMiddleware({app});
+  // const graphqlOptions = {
+  //   schema,
+  //   tracing: process.env.NODE_ENV !== "production",
+  //   introspection: true,
+  //   playground: true,
+  //   uploads: false,
+  //   plugins: [
+  //     {
+  //       requestDidStart() {
+  //         return {
+  //           responseForOperation,
+  //         };
+  //       },
+  //     },
+  //   ],
+  //   context: ({req, connection}) => ({
+  //     clientId: req?.headers.clientid || connection?.context.clientId,
+  //     core: req?.headers.core,
+  //   }),
+  // };
+
+
 
   let httpServer: http.Server | https.Server = http.createServer(app);
+
+  const wsServer = new WebSocketServer({
+    path: '/graphql',
+    server: httpServer,
+  });
+
+  const serverCleanup = useServer({ schema }, wsServer);
+
+  const apollo = new ApolloServer({
+    typeDefs, resolvers, introspection: true, plugins: [{
+      async requestDidStart() {
+        return {
+          responseForOperation,
+        };
+      },
+    }, 
+      ApolloServerPluginDrainHttpServer({ httpServer }),
+      {
+        async serverWillStart() {
+          return {
+            async drainServer() {
+              await serverCleanup.dispose();
+            },
+          };
+        },
+      }
+  ]});
+
+
+
+  await apollo.start();
+  app.use("/graphql", expressMiddleware(apollo));
+  //apollo.applyMiddleware({app});
+
+
   let isHttps = false;
   if (process.env.NODE_ENV === "production" && !httpOnly) {
     isHttps = true;
@@ -186,7 +245,6 @@ export default (
       insecureServer.listen(80);
     }
   }
-  apollo.installSubscriptionHandlers(httpServer);
 
   vanity();
 
@@ -202,7 +260,7 @@ export default (
 Client Server running on ${printUrl()}/client
 Access the Flight Director on ${printUrl()}
 GraphQL Server running on ${printUrl()}/graphql
-🚀 Subscriptions ready at ${printUrl({isWs: true})}${apollo.subscriptionsPath}`;
+🚀 Subscriptions ready at ${printUrl({isWs: true})}/graphql`;
 
   process.on("uncaughtException", function (err) {
     // String key because typescript is funky

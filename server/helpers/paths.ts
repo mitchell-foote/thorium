@@ -20,8 +20,10 @@ if (process.env.THORIUM_PATH) {
   }
 }
 
-const paths = {
+export const paths = {
   userData: thoriumPath,
 };
+
+
 
 export default paths;

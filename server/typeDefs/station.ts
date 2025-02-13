@@ -1,5 +1,6 @@
 import App from "../app";
-import {gql} from "apollo-server-express";
+import { gql } from "graphql-tag";
+;
 import {pubsub} from "../helpers/subscriptionManager";
 import uuid from "uuid";
 import {Simulator} from "../classes";
@@ -187,7 +188,7 @@ const resolver = {
         process.nextTick(() => {
           pubsub.publish(id, App.stationSets);
         });
-        return pubsub.asyncIterator([id, "stationSetUpdate"]);
+        return pubsub.asyncIterableIterator([id, "stationSetUpdate"]);
       },
     },
   },

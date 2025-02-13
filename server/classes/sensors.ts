@@ -44,10 +44,10 @@ class ProcessedData {
   }
 }
 export default class Sensors extends System {
-  type: "Sensors";
-  class: "Sensors";
+  declare type: "Sensors";
+  declare class: "Sensors";
   domain: "internal" | "external";
-  name: string;
+  declare name: string;
   pings: boolean;
   pingMode: string;
   timeSincePing: number;

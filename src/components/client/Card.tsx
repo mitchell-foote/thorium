@@ -9,7 +9,7 @@ import Lighting from "./lighting";
 import Reset from "./reset";
 import TrainingPlayer from "helpers/trainingPlayer";
 import {subscribe, publish} from "../../helpers/pubsub";
-import {useMutation} from "react-apollo";
+import {useMutation} from "@apollo/client";
 import gql from "graphql-tag.macro";
 import {playSound} from "../generic/SoundPlayer";
 import {randomFromList} from "helpers/randomFromList";

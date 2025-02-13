@@ -1,9 +1,8 @@
 import {ApolloClient, HttpLink, ApolloLink, split, from} from "@apollo/client";
 import {getMainDefinition} from "@apollo/client/utilities";
-import {onError} from "@apollo/link-error";
-import {WebSocketLink} from "@apollo/link-ws";
+import {onError} from "@apollo/client/link/error";
 import {MockLink} from "@apollo/client/testing";
-import {setContext} from "@apollo/link-context";
+import {setContext} from "@apollo/client/link/context";
 import {Hermes} from "apollo-cache-hermes";
 import {FLIGHTS_QUERY} from "../containers/FlightDirector/Welcome/Welcome";
 import {getClientId} from "helpers/getClientId";
@@ -12,6 +11,8 @@ import {getArgumentValues} from "graphql/execution/values";
 import {buildASTSchema, getOperationRootType} from "graphql";
 import {loader} from "graphql.macro";
 import {getFieldDef} from "graphql/execution/execute";
+import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
+import { createClient } from "graphql-ws";
 
 const schemaAST = loader("../schema.graphql");
 const schema = buildASTSchema(schemaAST);
@@ -34,13 +35,21 @@ const websocketUrl =
         parseInt(window.location.port || 3000, 10) + 1
       }/graphql`;
 
-const webSocketLink = new WebSocketLink({
-  uri: websocketUrl,
-  options: {
-    reconnect: true,
+const webSocketLink = new GraphQLWsLink(
+  createClient({
+    url: websocketUrl,
     connectionParams: () => getClientId().then(clientId => ({clientId})),
-  },
-});
+
+  }),
+);
+
+// const webSocketLink = new WebSocketLink({
+//   uri: websocketUrl,
+//   options: {
+//     reconnect: true,
+//     connectionParams: () => getClientId().then(clientId => ({clientId})),
+//   },
+// });
 
 const wsLink = ApolloLink.from([
   onError(args => {
