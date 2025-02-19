@@ -75,9 +75,15 @@ const wsLink = ApolloLink.from([
 
 const headersMiddleware = setContext((operation, {headers}) => {
   const core = window.location.pathname.includes("/core");
-  return getClientId().then(clientId => ({
-    headers: {...headers, clientId, core},
-  }));
+  return getClientId().then(clientId => {
+    return {
+      headers: {
+        ...headers,
+        clientId: clientId || 'none',
+        core,
+      }
+    }
+  });
 });
 
 const mutationMiddleware = new ApolloLink((operation, forward) => {
