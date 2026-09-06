@@ -8,6 +8,7 @@ import React, {
 // @ts-ignore - react-media-player has no type declarations
 import {Media, Player, controls, withMediaProps} from "react-media-player";
 import "./AdvancedTrainingMediaViewer.scss";
+import {getPositionStyle, SIZE_WIDTHS} from "./mediaViewerPosition";
 
 const {CurrentTime, Duration, Volume} = controls;
 
@@ -115,47 +116,6 @@ interface AdvancedTrainingMediaViewerProps {
   size?: "small" | "medium" | "large";
   position?: string;
   stripPosition?: "top" | "bottom";
-}
-
-const SIZE_WIDTHS = {small: 0.25, medium: 0.4, large: 0.6};
-const STRIP_HEIGHT = 64;
-const MARGIN = 16;
-
-// Return CSS properties that accurately position the viewer using browser layout
-// rather than guessing the element height in JavaScript.
-function getPositionStyle(
-  position: string,
-  size: "small" | "medium" | "large",
-  stripPosition: "top" | "bottom" = "bottom",
-): CSSProperties {
-  const [vert, horiz] = position.split("-");
-
-  const style: CSSProperties = {};
-
-  if (horiz === "left") {
-    style.left = MARGIN;
-  } else if (horiz === "right") {
-    style.right = MARGIN;
-  } else {
-    style.left = "50%";
-  } // center
-
-  if (vert === "top") {
-    style.top = stripPosition === "top" ? STRIP_HEIGHT + MARGIN : MARGIN;
-  } else if (vert === "bottom") {
-    style.bottom = stripPosition === "bottom" ? STRIP_HEIGHT + MARGIN : MARGIN;
-  } else {
-    style.top = "50%";
-  } // middle
-
-  const tx = horiz === "center" ? "-50%" : "0px";
-  const ty = vert === "middle" ? "-50%" : "0px";
-  if (tx !== "0px" || ty !== "0px") {
-    style.transform = `translate(${tx}, ${ty})`;
-  }
-
-  // Width is still set via viewerWidth in the component
-  return style;
 }
 
 const VIDEO_EXTENSIONS = ["mov", "mp4", "ogv", "webm", "m4v"];
@@ -317,7 +277,7 @@ const AdvancedTrainingMediaViewer: React.FC<
         bottom: "auto",
         transform: `translate(${dragPos.x}px, ${dragPos.y}px)`,
       }
-    : getPositionStyle(position, size, stripPosition);
+    : getPositionStyle(position, stripPosition);
 
   return (
     <div
