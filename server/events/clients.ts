@@ -9,6 +9,7 @@ import fs from "fs";
 import uuid from "uuid";
 import tokenGenerator from "../helpers/tokenGenerator";
 import {DMXFixture} from "../classes";
+import {pruneStaleAdvancedTrainingProgress} from "./advancedTrainingCleanup";
 
 function randomFromList(list) {
   if (!list) return;
@@ -72,18 +73,23 @@ App.on("clientPing", ({client}) => {
 App.on("clientSetFlight", ({client, flightId, cb}) => {
   const clientObj = App.clients.find(c => c.id === client);
   clientObj.setFlight(flightId);
+  // A training session is only valid while the client's flight/simulator/station
+  // still match the progress record it's bound to.
+  pruneStaleAdvancedTrainingProgress();
   pubsub.publish("clientChanged", App.clients);
   cb && cb();
 });
 App.on("clientSetSimulator", ({client, simulatorId, cb}) => {
   const clientObj = App.clients.find(c => c.id === client);
   clientObj.setSimulator(simulatorId);
+  pruneStaleAdvancedTrainingProgress();
   pubsub.publish("clientChanged", App.clients);
   cb && cb();
 });
 App.on("clientSetStation", ({client, stationName, cb}) => {
   const clientObj = App.clients.find(c => c.id === client);
   clientObj.setStation(stationName);
+  pruneStaleAdvancedTrainingProgress();
   const simulatorId = clientObj.simulatorId;
   pubsub.publish("clientChanged", App.clients);
   // If the station name is 'Viewscreen', check for or create a viewscreen for the client

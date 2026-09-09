@@ -5,6 +5,7 @@ import {useQuerySub} from "helpers/hooks/useQueryAndSubscribe";
 import Preview from "components/views/TacticalMap/preview";
 import {getItemCenter} from "components/views/TacticalMap/preview/layerComps/clampToBounds";
 import "./AdvancedTrainingTacticalMapViewer.scss";
+import {getPositionStyle, SIZE_WIDTHS} from "./mediaViewerPosition";
 
 // Floating training exercise panel: a read-only-by-construction (core=false)
 // render of a live, per-client tactical map instance, driven by the crew's
@@ -146,44 +147,6 @@ interface AdvancedTrainingTacticalMapViewerProps {
   stripPosition?: "top" | "bottom";
   showDoneButton?: boolean;
   onMarkComplete?: () => void;
-}
-
-const SIZE_WIDTHS = {small: 0.25, medium: 0.4, large: 0.6};
-const STRIP_HEIGHT = 64;
-const MARGIN = 16;
-
-// Same positioning approach as AdvancedTrainingMediaViewer.tsx: CSS-driven
-// placement against a 3x3 anchor grid until the user drags, then pixel-based.
-function getPositionStyle(
-  position: string,
-  stripPosition: "top" | "bottom" = "bottom",
-): CSSProperties {
-  const [vert, horiz] = position.split("-");
-  const style: CSSProperties = {};
-
-  if (horiz === "left") {
-    style.left = MARGIN;
-  } else if (horiz === "right") {
-    style.right = MARGIN;
-  } else {
-    style.left = "50%";
-  }
-
-  if (vert === "top") {
-    style.top = stripPosition === "top" ? STRIP_HEIGHT + MARGIN : MARGIN;
-  } else if (vert === "bottom") {
-    style.bottom = stripPosition === "bottom" ? STRIP_HEIGHT + MARGIN : MARGIN;
-  } else {
-    style.top = "50%";
-  }
-
-  const tx = horiz === "center" ? "-50%" : "0px";
-  const ty = vert === "middle" ? "-50%" : "0px";
-  if (tx !== "0px" || ty !== "0px") {
-    style.transform = `translate(${tx}, ${ty})`;
-  }
-
-  return style;
 }
 
 const AdvancedTrainingTacticalMapViewer: React.FC<

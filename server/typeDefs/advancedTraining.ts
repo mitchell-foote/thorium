@@ -3,6 +3,7 @@ import {gql, withFilter} from "apollo-server-express";
 import {pubsub} from "../helpers/subscriptionManager";
 import uuid from "uuid";
 import {AdvancedTrainingConfig} from "../classes/advancedTraining";
+import {pruneStaleAdvancedTrainingProgress} from "../events/advancedTrainingCleanup";
 
 function getStationConfig(stationSetID: string, stationName: string) {
   const stationSet = App.stationSets.find((s: any) => s.id === stationSetID);
@@ -224,13 +225,21 @@ const resolver = {
     advancedTrainingProgress(client: any) {
       return (
         App.advancedTrainingProgress?.find(
-          (p: any) => p.clientId === client.id,
+          (p: any) =>
+            p.clientId === client.id &&
+            p.simulatorId === client.simulatorId &&
+            p.stationName === client.station,
         ) || null
       );
     },
   },
   Query: {
     advancedTrainingProgress(_root: any, {clientId, simulatorId}: any) {
+      // The client hits this on every mount of AdvancedTrainingBorder
+      // (fetchPolicy: "network-only"), so it's the safety net that drops any
+      // progress record left dangling by a flight delete/reset or a
+      // station/simulator reassignment before the client can act on it.
+      pruneStaleAdvancedTrainingProgress();
       let progress = App.advancedTrainingProgress || [];
       if (clientId) {
         progress = progress.filter((p: any) => p.clientId === clientId);
