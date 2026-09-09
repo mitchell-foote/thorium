@@ -1,3 +1,10 @@
+## [4.9.1](https://github.com/Thorium-Sim/thorium/compare/4.9.0...4.9.1) (2026-09-09)
+
+
+### Bug Fixes
+
+* **3549:** advanced training bugs ([839286d](https://github.com/Thorium-Sim/thorium/commit/839286d654bb5b5285564c31d64c8e10bbe61c3a))
+
 # [4.9.0](https://github.com/Thorium-Sim/thorium/compare/4.8.0...4.9.0) (2026-08-26)
 
 
