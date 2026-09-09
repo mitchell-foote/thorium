@@ -5,6 +5,7 @@ import uuid from "uuid";
 import * as Classes from "../classes";
 import cloneDeep from "lodash.clonedeep";
 import tokenGenerator from "../helpers/tokenGenerator";
+import {stopAdvancedTrainingForClients} from "../events/advancedTrainingCleanup";
 
 export const aspectList = [
   "systems",
@@ -472,6 +473,15 @@ const resolver = {
       // Reset the clients
       flight.clearTimeouts();
 
+      // End any advanced-training sessions for this flight's clients before the
+      // clients are reset and the simulators/tactical maps are torn down — the
+      // session teardown deletes each trainee's private tactical map instance
+      // and needs it to still exist.
+      const deletedClientIds = new Set(
+        App.clients.filter(c => c.flightId === flightId).map(c => c.id),
+      );
+      stopAdvancedTrainingForClients(p => deletedClientIds.has(p.clientId));
+
       App.clients
         .concat()
         .filter(c => c.flightId === flightId)
@@ -500,6 +510,14 @@ const resolver = {
       flight.clearTimeouts();
 
       flightId = flight.id;
+
+      // End advanced-training sessions before resetting clients / tearing down
+      // tactical maps (see deleteFlight above).
+      const resetClientIds = new Set(
+        App.clients.filter(c => c.flightId === flightId).map(c => c.id),
+      );
+      stopAdvancedTrainingForClients(p => resetClientIds.has(p.clientId));
+
       // Log out the clients
       App.clients
         .concat()
