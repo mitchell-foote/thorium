@@ -21,17 +21,24 @@ export class RequiredAction {
 export interface SubChapterParams {
   id?: string;
   name?: string;
+  mediaAsset?: string | null;
+  autoOpenMedia?: boolean;
   requiredActions?: RequiredActionParams[];
 }
 
 export class SubChapter {
   id: string;
   name: string;
+  // Optional per-step media. Size/position are inherited from the chapter.
+  mediaAsset: string | null;
+  autoOpenMedia: boolean;
   requiredActions: RequiredAction[];
 
   constructor(params: SubChapterParams = {}) {
     this.id = params.id || uuid.v4();
     this.name = params.name || "New Sub-Chapter";
+    this.mediaAsset = params.mediaAsset || null;
+    this.autoOpenMedia = params.autoOpenMedia ?? true;
     this.requiredActions = (params.requiredActions || []).map(
       a => new RequiredAction(a),
     );
@@ -69,6 +76,7 @@ export interface ChapterParams {
   autoOpenTacticalMap?: boolean;
   tacticalMapSize?: "small" | "medium" | "large";
   tacticalMapPosition?: string;
+  transporterTargetCount?: number;
   subChapters?: SubChapterParams[];
 }
 
@@ -91,6 +99,9 @@ export class Chapter {
   autoOpenTacticalMap: boolean;
   tacticalMapSize: "small" | "medium" | "large";
   tacticalMapPosition: string;
+  // Transporters card: number of targets auto-added ~5s after a crew scan
+  // begins (0 = off, FD adds targets from core).
+  transporterTargetCount: number;
   subChapters: SubChapter[];
 
   constructor(params: ChapterParams = {}) {
@@ -115,6 +126,10 @@ export class Chapter {
     this.autoOpenTacticalMap = params.autoOpenTacticalMap ?? false;
     this.tacticalMapSize = params.tacticalMapSize || "medium";
     this.tacticalMapPosition = params.tacticalMapPosition || "bottom-right";
+    this.transporterTargetCount = Math.max(
+      0,
+      Math.floor(Number(params.transporterTargetCount) || 0),
+    );
     this.subChapters = (params.subChapters || []).map(s => new SubChapter(s));
   }
 

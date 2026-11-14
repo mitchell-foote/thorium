@@ -280,6 +280,20 @@ export function useAdvancedTrainingConfigEditor({
     );
   };
 
+  // Which collection a chapter id lives in (undefined = regular chapter).
+  const getChapterKind = (chapterId: string): SpecialKind | undefined => {
+    if (editingLogin?.id === chapterId) {
+      return "login";
+    }
+    if (editingCompletion?.id === chapterId) {
+      return "completion";
+    }
+    if (editingInFlightChapters?.some((c: any) => c.id === chapterId)) {
+      return "inflight";
+    }
+    return undefined;
+  };
+
   // --- Record mode helpers ---
   const startRecording = (chapterId: string, subChapterId: string) => {
     setRecordingSubChapter(`${chapterId}:${subChapterId}`);
@@ -294,14 +308,11 @@ export function useAdvancedTrainingConfigEditor({
       return;
     }
     const [chapterId, subChapterId] = recordingSubChapter.split(":");
-    const isInFlight = editingInFlightChapters?.some(
-      (c: any) => c.id === chapterId,
-    );
     updateSubChapter(
       chapterId,
       subChapterId,
       {requiredActions: actions},
-      isInFlight ? "inflight" : undefined,
+      getChapterKind(chapterId),
     );
     setRecordingSubChapter(null);
   };
@@ -310,7 +321,11 @@ export function useAdvancedTrainingConfigEditor({
   const recordingSubChapterId = recordingSubChapter?.split(":")[1];
   const recordingChapter =
     editingChapters?.find((c: any) => c.id === recordingChapterId) ||
-    editingInFlightChapters?.find((c: any) => c.id === recordingChapterId);
+    editingInFlightChapters?.find((c: any) => c.id === recordingChapterId) ||
+    (editingLogin?.id === recordingChapterId ? editingLogin : undefined) ||
+    (editingCompletion?.id === recordingChapterId
+      ? editingCompletion
+      : undefined);
   const recordingSubChapterData = recordingChapter?.subChapters?.find(
     (s: any) => s.id === recordingSubChapterId,
   );
@@ -354,5 +369,6 @@ export function useAdvancedTrainingConfigEditor({
     startRecording,
     cancelRecording,
     saveRecording,
+    getChapterKind,
   };
 }

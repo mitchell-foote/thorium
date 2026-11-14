@@ -79,6 +79,7 @@ type AdvancedTrainingChapter {
   autoOpenTacticalMap: Boolean!
   tacticalMapSize: String!
   tacticalMapPosition: String!
+  transporterTargetCount: Int!
   subChapters: [AdvancedTrainingSubChapter!]!
 }
 
@@ -97,6 +98,7 @@ input AdvancedTrainingChapterInput {
   autoOpenTacticalMap: Boolean
   tacticalMapSize: String
   tacticalMapPosition: String
+  transporterTargetCount: Int
   subChapters: [AdvancedTrainingSubChapterInput!]
 }
 
@@ -152,12 +154,16 @@ input AdvancedTrainingRequiredActionInput {
 type AdvancedTrainingSubChapter {
   id: ID!
   name: String!
+  mediaAsset: String
+  autoOpenMedia: Boolean!
   requiredActions: [AdvancedTrainingRequiredAction!]!
 }
 
 input AdvancedTrainingSubChapterInput {
   id: ID
   name: String!
+  mediaAsset: String
+  autoOpenMedia: Boolean
   requiredActions: [AdvancedTrainingRequiredActionInput!]
 }
 

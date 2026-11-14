@@ -48,6 +48,7 @@ export function emptyChapter(id: string, name: string) {
     autoOpenTacticalMap: false,
     tacticalMapSize: "medium",
     tacticalMapPosition: "bottom-right",
+    transporterTargetCount: 2,
     subChapters: [],
   };
 }
@@ -70,9 +71,12 @@ export function serializeChapter(ch: any) {
     autoOpenTacticalMap: ch.autoOpenTacticalMap ?? false,
     tacticalMapSize: ch.tacticalMapSize || "medium",
     tacticalMapPosition: ch.tacticalMapPosition || "bottom-right",
+    transporterTargetCount: ch.transporterTargetCount ?? 0,
     subChapters: (ch.subChapters || []).map((sc: any) => ({
       id: sc.id,
       name: sc.name,
+      mediaAsset: sc.mediaAsset || null,
+      autoOpenMedia: sc.autoOpenMedia ?? true,
       requiredActions: (sc.requiredActions || []).map((ra: any) => ({
         id: ra.id,
         eventName: ra.eventName,
@@ -153,7 +157,8 @@ interface ChapterEditorProps {
   onRemoveSubChapter: (subId: string) => void;
   onUpdateSubChapter: (subId: string, updates: any) => void;
   onStartRecording: (subId: string) => void;
-  onSetMediaPicker: () => void;
+  // subId is provided when picking media for a sub-chapter instead of the chapter.
+  onSetMediaPicker: (subId?: string) => void;
   showCardSelector?: boolean;
   isLoginChapter?: boolean;
 }
@@ -245,7 +250,11 @@ export const ChapterEditor: React.FC<ChapterEditorProps> = ({
           <FormGroup>
             <Label>Media Asset: {chapter.mediaAsset || <em>None</em>}</Label>
             <div style={{display: "flex", gap: "4px"}}>
-              <Button size="sm" color="secondary" onClick={onSetMediaPicker}>
+              <Button
+                size="sm"
+                color="secondary"
+                onClick={() => onSetMediaPicker()}
+              >
                 Browse
               </Button>
               {chapter.mediaAsset && (
@@ -359,6 +368,33 @@ export const ChapterEditor: React.FC<ChapterEditorProps> = ({
 
           <TrainingTacticalMapConfig chapter={chapter} onUpdate={onUpdate} />
 
+          {chapter.cardComponent === "Transporters" && (
+            <FormGroup>
+              <Label>Transporter targets after scan</Label>
+              <Input
+                type="number"
+                min={0}
+                max={10}
+                bsSize="sm"
+                style={{width: "80px"}}
+                value={chapter.transporterTargetCount ?? 0}
+                onChange={e =>
+                  onUpdate({
+                    transporterTargetCount: Math.max(
+                      0,
+                      parseInt(e.target.value, 10) || 0,
+                    ),
+                  })
+                }
+              />
+              <small style={{color: "#888"}}>
+                When the crew begins a transport scan on this chapter, this many
+                targets appear after ~5 seconds so they can align and complete
+                the transport. 0 = off (add targets from the Transporter core).
+              </small>
+            </FormGroup>
+          )}
+
           {/* Sub-chapters */}
           <div style={{marginTop: "8px"}}>
             <Label style={{fontWeight: 600}}>Sub-Chapters</Label>
@@ -409,7 +445,55 @@ export const ChapterEditor: React.FC<ChapterEditorProps> = ({
                     X
                   </Button>
                 </div>
-                {chapter.mediaAsset && (
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "6px",
+                    alignItems: "center",
+                    paddingLeft: "28px",
+                    marginBottom: "4px",
+                    fontSize: "12px",
+                  }}
+                >
+                  <span style={{color: "#aaa"}}>
+                    Step media: {sub.mediaAsset || <em>None</em>}
+                  </span>
+                  <Button
+                    size="sm"
+                    color="secondary"
+                    outline
+                    onClick={() => onSetMediaPicker(sub.id)}
+                  >
+                    Browse
+                  </Button>
+                  {sub.mediaAsset && (
+                    <>
+                      <Button
+                        size="sm"
+                        color="warning"
+                        outline
+                        onClick={() =>
+                          onUpdateSubChapter(sub.id, {mediaAsset: null})
+                        }
+                      >
+                        Clear
+                      </Button>
+                      <Label check style={{display: "flex", gap: "4px"}}>
+                        <input
+                          type="checkbox"
+                          checked={sub.autoOpenMedia ?? true}
+                          onChange={e =>
+                            onUpdateSubChapter(sub.id, {
+                              autoOpenMedia: e.target.checked,
+                            })
+                          }
+                        />
+                        Auto-open
+                      </Label>
+                    </>
+                  )}
+                </div>
+                {(chapter.mediaAsset || sub.mediaAsset) && (
                   <SyntheticActionToggle
                     sub={sub}
                     eventName={VIDEO_COMPLETE_EVENT}

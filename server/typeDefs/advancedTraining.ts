@@ -23,6 +23,8 @@ const schema = gql`
   type AdvancedTrainingSubChapter {
     id: ID!
     name: String!
+    mediaAsset: String
+    autoOpenMedia: Boolean!
     requiredActions: [AdvancedTrainingRequiredAction!]!
   }
 
@@ -41,6 +43,7 @@ const schema = gql`
     autoOpenTacticalMap: Boolean!
     tacticalMapSize: String!
     tacticalMapPosition: String!
+    transporterTargetCount: Int!
     subChapters: [AdvancedTrainingSubChapter!]!
   }
 
@@ -80,6 +83,8 @@ const schema = gql`
   input AdvancedTrainingSubChapterInput {
     id: ID
     name: String!
+    mediaAsset: String
+    autoOpenMedia: Boolean
     requiredActions: [AdvancedTrainingRequiredActionInput!]
   }
 
@@ -98,6 +103,7 @@ const schema = gql`
     autoOpenTacticalMap: Boolean
     tacticalMapSize: String
     tacticalMapPosition: String
+    transporterTargetCount: Int
     subChapters: [AdvancedTrainingSubChapterInput!]
   }
 

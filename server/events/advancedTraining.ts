@@ -10,6 +10,10 @@ import {
   activateChapter,
 } from "./advancedTrainingHelpers";
 import {
+  applySubChapterMedia,
+  shouldOpenMediaOnActivate,
+} from "./advancedTrainingSubChapterMedia";
+import {
   provisionTrainingTacticalMap,
   teardownTrainingTacticalMap,
 } from "./advancedTrainingTacticalMap";
@@ -90,9 +94,9 @@ App.on("clientStartAdvancedTraining", ({clientId}: any) => {
     stationName: client.station,
     activeChapterId: startChapter?.id || null,
     activeSubChapterId: firstSubChapter?.id || null,
-    mediaViewerOpen: !!(
-      startChapter?.autoOpenMedia && startChapter?.mediaAsset
-    ),
+    mediaViewerOpen: startChapter
+      ? shouldOpenMediaOnActivate(startChapter, firstSubChapter?.id || null)
+      : false,
   });
 
   App.advancedTrainingProgress.push(progress);
@@ -215,6 +219,12 @@ App.on("clientAdvancedTrainingAction", ({clientId, eventName, args}: any) => {
         // Move to next incomplete sub-chapter
         const nextSubChapter = chapter.subChapters.find(
           (sc: any) => !progress.isSubChapterComplete(sc.id),
+        );
+        applySubChapterMedia(
+          progress,
+          chapter,
+          subChapter.id,
+          nextSubChapter?.id || null,
         );
         progress.setActiveSubChapter(nextSubChapter?.id || null);
 

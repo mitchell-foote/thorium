@@ -24,7 +24,7 @@ interface InFlightChaptersSectionProps {
   onRemoveSubChapter: (chapterId: string, subId: string) => void;
   onUpdateSubChapter: (chapterId: string, subId: string, updates: any) => void;
   onStartRecording: (chapterId: string, subId: string) => void;
-  onSetMediaPicker: (chapterId: string) => void;
+  onSetMediaPicker: (chapterId: string, subId?: string) => void;
 }
 
 // Mirrors CardsTable's view list: every known card component, minus the ones
@@ -102,7 +102,7 @@ const InFlightChaptersSection: React.FC<InFlightChaptersSectionProps> = ({
             onUpdateSubChapter(chapter.id, subId, updates)
           }
           onStartRecording={subId => onStartRecording(chapter.id, subId)}
-          onSetMediaPicker={() => onSetMediaPicker(chapter.id)}
+          onSetMediaPicker={subId => onSetMediaPicker(chapter.id, subId)}
         />
       ))}
 

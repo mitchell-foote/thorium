@@ -3,6 +3,7 @@ import "./core";
 import "./engines";
 import "./sensors";
 import "./transporters";
+import "./advancedTrainingTransporters";
 import "./clients";
 import "./simulator";
 import "./stationSet";

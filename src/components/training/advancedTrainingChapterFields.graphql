@@ -13,9 +13,12 @@ fragment AdvancedTrainingChapterFields on AdvancedTrainingChapter {
   autoOpenTacticalMap
   tacticalMapSize
   tacticalMapPosition
+  transporterTargetCount
   subChapters {
     id
     name
+    mediaAsset
+    autoOpenMedia
     requiredActions {
       id
       eventName

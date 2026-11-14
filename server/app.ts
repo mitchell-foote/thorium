@@ -203,6 +203,13 @@ class Events extends EventEmitter {
     const snap = this.trimSnapshot({...this});
     store.set(snap, null);
   }
+  // Write the snapshot to disk immediately, bypassing the store's throttle.
+  flushSnapshot() {
+    this.snapshotVersion = this.version;
+    const snap = this.trimSnapshot({...this});
+    store.set(snap, null);
+    store.flushSync();
+  }
   saveRestore() {
     this.snapshotVersion = this.version;
     const snap = this.trimSnapshot({...this});

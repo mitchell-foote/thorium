@@ -6,6 +6,7 @@ import broadcast from "./bootstrap/broadcast";
 import clientServer from "./bootstrap/client-server";
 import postMigration from "./bootstrap/postmigration";
 import cleanUp from "./bootstrap/cleanup";
+import shutdown from "./bootstrap/shutdown";
 import App from "./app";
 import * as ClassesImport from "./classes";
 
@@ -22,6 +23,7 @@ Promise.resolve()
   .then(server => apollo(server, App.port, App.httpOnly, App.setMutations))
   .then(() => postMigration())
   .then(() => cleanUp())
+  .then(() => shutdown())
   .catch(err => console.error("Error:", err));
 
 // If --expose-gc flag is set, handle garbage collection

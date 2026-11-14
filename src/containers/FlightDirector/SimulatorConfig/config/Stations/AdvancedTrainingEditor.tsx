@@ -15,6 +15,30 @@ import InFlightChaptersSection from "./InFlightChaptersSection";
 import RecordActionsModal from "./RecordActionsModal";
 import type {useAdvancedTrainingConfigEditor} from "./useAdvancedTrainingConfigEditor";
 
+type PickerKind = "regular" | "login" | "completion" | "inflight";
+
+// Encode which chapter (or sub-chapter) the media picker is choosing a file for.
+// Chapter keys keep their legacy shape ("<id>" or "<kind>:<id>"); sub-chapter
+// keys are "sub|<kind>|<chapterId>|<subId>".
+function pickerKey(kind: PickerKind, chapterId: string, subId?: string) {
+  if (subId) {
+    return `sub|${kind}|${chapterId}|${subId}`;
+  }
+  return kind === "regular" ? chapterId : `${kind}:${chapterId}`;
+}
+
+function parsePickerKey(key: string): {
+  kind: PickerKind;
+  chapterId: string;
+  subId?: string;
+} {
+  if (key.startsWith("sub|")) {
+    const [, kind, chapterId, subId] = key.split("|");
+    return {kind: kind as PickerKind, chapterId, subId};
+  }
+  return {kind: "regular", chapterId: key};
+}
+
 interface AdvancedTrainingEditorProps {
   editor: ReturnType<typeof useAdvancedTrainingConfigEditor>;
   stationCards: any[];
@@ -222,8 +246,10 @@ const AdvancedTrainingEditor: React.FC<AdvancedTrainingEditorProps> = ({
                 updateSubChapter(editingLogin.id, subId, updates, "login")
               }
               onStartRecording={subId => startRecording(editingLogin.id, subId)}
-              onSetMediaPicker={() =>
-                setMediaPickerChapter(`login:${editingLogin.id}`)
+              onSetMediaPicker={subId =>
+                setMediaPickerChapter(
+                  pickerKey("login", editingLogin.id, subId),
+                )
               }
               showCardSelector={false}
               isLoginChapter
@@ -249,7 +275,9 @@ const AdvancedTrainingEditor: React.FC<AdvancedTrainingEditorProps> = ({
             updateSubChapter(chapter.id, subId, updates)
           }
           onStartRecording={subId => startRecording(chapter.id, subId)}
-          onSetMediaPicker={() => setMediaPickerChapter(chapter.id)}
+          onSetMediaPicker={subId =>
+            setMediaPickerChapter(pickerKey("regular", chapter.id, subId))
+          }
         />
       ))}
 
@@ -272,8 +300,8 @@ const AdvancedTrainingEditor: React.FC<AdvancedTrainingEditorProps> = ({
         onStartRecording={(chapterId, subId) =>
           startRecording(chapterId, subId)
         }
-        onSetMediaPicker={chapterId =>
-          setMediaPickerChapter(`inflight:${chapterId}`)
+        onSetMediaPicker={(chapterId, subId) =>
+          setMediaPickerChapter(pickerKey("inflight", chapterId, subId))
         }
       />
 
@@ -337,8 +365,10 @@ const AdvancedTrainingEditor: React.FC<AdvancedTrainingEditorProps> = ({
             onStartRecording={subId =>
               startRecording(editingCompletion.id, subId)
             }
-            onSetMediaPicker={() =>
-              setMediaPickerChapter(`completion:${editingCompletion.id}`)
+            onSetMediaPicker={subId =>
+              setMediaPickerChapter(
+                pickerKey("completion", editingCompletion.id, subId),
+              )
             }
             showCardSelector={false}
           />
@@ -371,6 +401,17 @@ const AdvancedTrainingEditor: React.FC<AdvancedTrainingEditorProps> = ({
             selectedFiles={[]}
             onClick={(_evt: any, container: any) => {
               if (mediaPickerChapter) {
+                const target = parsePickerKey(mediaPickerChapter);
+                if (target.subId) {
+                  updateSubChapter(
+                    target.chapterId,
+                    target.subId,
+                    {mediaAsset: container.fullPath},
+                    target.kind === "regular" ? undefined : target.kind,
+                  );
+                  setMediaPickerChapter(null);
+                  return;
+                }
                 const isLogin = mediaPickerChapter.startsWith("login:");
                 const isCompletion =
                   mediaPickerChapter.startsWith("completion:");

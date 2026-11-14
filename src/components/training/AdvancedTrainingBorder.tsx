@@ -172,6 +172,9 @@ const AdvancedTrainingBorder: React.FC<AdvancedTrainingBorderProps> = ({
   );
   const observedForSub =
     progress.observedActions?.[progress.activeSubChapterId || ""] || [];
+  // A sub-chapter's own media (if any) takes precedence over the chapter's.
+  const activeMediaAsset: string | null =
+    activeSubChapter?.mediaAsset || activeChapter?.mediaAsset || null;
   const pendingActions = (activeSubChapter?.requiredActions || []).filter(
     (ra: any) => !observedForSub.includes(ra.eventName),
   );
@@ -241,10 +244,10 @@ const AdvancedTrainingBorder: React.FC<AdvancedTrainingBorderProps> = ({
           )}
 
           {/* Media viewer popover */}
-          {progress.mediaViewerOpen && activeChapter?.mediaAsset && (
+          {progress.mediaViewerOpen && activeChapter && activeMediaAsset && (
             <AdvancedTrainingMediaViewer
-              key={progress.activeChapterId || "media"}
-              src={`/assets${activeChapter.mediaAsset}`}
+              key={`${progress.activeChapterId || "media"}:${activeMediaAsset}`}
+              src={`/assets${activeMediaAsset}`}
               onClose={() => toggleMediaViewer(false)}
               onVideoEnd={onVideoEnd}
               size={activeChapter.mediaSize || "small"}
@@ -365,7 +368,7 @@ const AdvancedTrainingBorder: React.FC<AdvancedTrainingBorderProps> = ({
                 }`}
                 onClick={() => toggleMediaViewer(!progress.mediaViewerOpen)}
                 title="Media Viewer"
-                disabled={!activeChapter?.mediaAsset}
+                disabled={!activeMediaAsset}
               >
                 <svg
                   viewBox="0 0 24 24"

@@ -2,6 +2,7 @@ import App from "../app";
 import {pubsub} from "../helpers/subscriptionManager";
 import {AdvancedTrainingProgress} from "../classes/advancedTrainingProgress";
 import {provisionTrainingTacticalMap} from "./advancedTrainingTacticalMap";
+import {shouldOpenMediaOnActivate} from "./advancedTrainingSubChapterMedia";
 
 // Shared helpers for the advanced-training event handlers. Kept separate from
 // the listener registrations in ./advancedTraining so neither file grows
@@ -134,7 +135,7 @@ export function advanceToNextChapter(
     return;
   }
 
-  if (nextChapter.autoOpenMedia && nextChapter.mediaAsset) {
+  if (shouldOpenMediaOnActivate(nextChapter, progress.activeSubChapterId)) {
     progress.setMediaViewerOpen(true);
   }
   if (nextChapter.autoOpenTacticalMap && nextChapter.tacticalMapId) {
@@ -166,7 +167,9 @@ export function activateChapter(
     );
   }
 
-  progress.setMediaViewerOpen(!!(chapter.autoOpenMedia && chapter.mediaAsset));
+  progress.setMediaViewerOpen(
+    shouldOpenMediaOnActivate(chapter, progress.activeSubChapterId),
+  );
   progress.setTacticalMapViewerOpen(
     !!(chapter.autoOpenTacticalMap && chapter.tacticalMapId),
   );

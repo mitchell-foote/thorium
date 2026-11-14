@@ -4,6 +4,7 @@
 import {
   writeFile as _writeFile,
   readFileSync,
+  writeFileSync as _writeFileSync,
   readdirSync,
   existsSync,
   mkdirSync,
@@ -331,6 +332,16 @@ class Store {
         console.error(err);
       }
     });
+  }
+
+  /**
+   * Synchronously write the current data to disk right now, bypassing the
+   * throttle. Used on mutation responses and at shutdown so changes are never
+   * stranded in the throttle window.
+   */
+  flushSync() {
+    mkdir(_dirname(this.path), this.options.mkdir);
+    _writeFileSync(this.path, this.json(this.data), {mode: 0o0600});
   }
 
   writeRestore(data) {

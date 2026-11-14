@@ -109,6 +109,7 @@ export type AdvancedTrainingChapter = {
   autoOpenTacticalMap: Scalars['Boolean'];
   tacticalMapSize: Scalars['String'];
   tacticalMapPosition: Scalars['String'];
+  transporterTargetCount: Scalars['Int'];
   subChapters: Array<AdvancedTrainingSubChapter>;
 };
 
@@ -127,6 +128,7 @@ export type AdvancedTrainingChapterInput = {
   autoOpenTacticalMap?: Maybe<Scalars['Boolean']>;
   tacticalMapSize?: Maybe<Scalars['String']>;
   tacticalMapPosition?: Maybe<Scalars['String']>;
+  transporterTargetCount?: Maybe<Scalars['Int']>;
   subChapters?: Maybe<Array<AdvancedTrainingSubChapterInput>>;
 };
 
@@ -186,12 +188,16 @@ export type AdvancedTrainingSubChapter = {
   __typename?: 'AdvancedTrainingSubChapter';
   id: Scalars['ID'];
   name: Scalars['String'];
+  mediaAsset?: Maybe<Scalars['String']>;
+  autoOpenMedia: Scalars['Boolean'];
   requiredActions: Array<AdvancedTrainingRequiredAction>;
 };
 
 export type AdvancedTrainingSubChapterInput = {
   id?: Maybe<Scalars['ID']>;
   name: Scalars['String'];
+  mediaAsset?: Maybe<Scalars['String']>;
+  autoOpenMedia?: Maybe<Scalars['Boolean']>;
   requiredActions?: Maybe<Array<AdvancedTrainingRequiredActionInput>>;
 };
 
@@ -12851,10 +12857,10 @@ export type MissionMacrosQuery = (
 
 export type AdvancedTrainingChapterFieldsFragment = (
   { __typename?: 'AdvancedTrainingChapter' }
-  & Pick<AdvancedTrainingChapter, 'id' | 'name' | 'cardComponent' | 'mediaAsset' | 'autoOpenMedia' | 'autoAdvance' | 'autoLogin' | 'cardSwitchBehavior' | 'mediaSize' | 'mediaPosition' | 'tacticalMapId' | 'autoOpenTacticalMap' | 'tacticalMapSize' | 'tacticalMapPosition'>
+  & Pick<AdvancedTrainingChapter, 'id' | 'name' | 'cardComponent' | 'mediaAsset' | 'autoOpenMedia' | 'autoAdvance' | 'autoLogin' | 'cardSwitchBehavior' | 'mediaSize' | 'mediaPosition' | 'tacticalMapId' | 'autoOpenTacticalMap' | 'tacticalMapSize' | 'tacticalMapPosition' | 'transporterTargetCount'>
   & { subChapters: Array<(
     { __typename?: 'AdvancedTrainingSubChapter' }
-    & Pick<AdvancedTrainingSubChapter, 'id' | 'name'>
+    & Pick<AdvancedTrainingSubChapter, 'id' | 'name' | 'mediaAsset' | 'autoOpenMedia'>
     & { requiredActions: Array<(
       { __typename?: 'AdvancedTrainingRequiredAction' }
       & Pick<AdvancedTrainingRequiredAction, 'id' | 'eventName' | 'args'>
@@ -17570,9 +17576,12 @@ export const AdvancedTrainingChapterFieldsFragmentDoc = gql`
   autoOpenTacticalMap
   tacticalMapSize
   tacticalMapPosition
+  transporterTargetCount
   subChapters {
     id
     name
+    mediaAsset
+    autoOpenMedia
     requiredActions {
       id
       eventName

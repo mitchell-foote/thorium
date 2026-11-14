@@ -138,6 +138,8 @@ const actionRegistry: CardActions[] = [
       {eventName: "setTransportCharge", label: "Charge Transporters"},
       {eventName: "beginTransportScan", label: "Begin Transport Scan"},
       {eventName: "cancelTransportScan", label: "Cancel Scan"},
+      {eventName: "completeTransport", label: "Complete Transport"},
+      {eventName: "clearTransportTargets", label: "Cancel Transport"},
     ],
   },
 ];

@@ -143,6 +143,18 @@ export default (
         requestDidStart() {
           return {
             responseForOperation,
+            // Direct mutation resolvers run after App.handleEvent has already
+            // snapshotted, so re-snapshot once the response is ready to capture
+            // their changes (otherwise a throttled leading-edge write would
+            // persist the pre-mutation state).
+            willSendResponse(ctx: any) {
+              if (
+                process.env.NODE_ENV === "production" &&
+                ctx.operation?.operation === "mutation"
+              ) {
+                App.snapshot();
+              }
+            },
           };
         },
       },

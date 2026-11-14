@@ -5,6 +5,7 @@ import {
   autoCompleteIfEmpty,
   advanceToNextChapter,
 } from "./advancedTrainingHelpers";
+import {applySubChapterMedia} from "./advancedTrainingSubChapterMedia";
 import {
   provisionTrainingTacticalMap,
   teardownTrainingTacticalMap,
@@ -32,6 +33,12 @@ App.on("fdCompleteTrainingSubChapter", ({clientId, subChapterId}: any) => {
     if (chapter) {
       const nextSubChapter = chapter.subChapters.find(
         (sc: any) => !progress.isSubChapterComplete(sc.id),
+      );
+      applySubChapterMedia(
+        progress,
+        chapter,
+        subChapterId,
+        nextSubChapter?.id || null,
       );
       progress.setActiveSubChapter(nextSubChapter?.id || null);
 
