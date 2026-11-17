@@ -1,0 +1,9 @@
+subscription HullPlatingPing($simulatorId: ID!) {
+  hullPlatingPing(simulatorId: $simulatorId) {
+    id
+    hitType
+    bearing
+    absorbed
+    intensity
+  }
+}

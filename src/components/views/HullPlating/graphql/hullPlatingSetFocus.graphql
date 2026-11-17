@@ -1,0 +1,3 @@
+mutation HullPlatingSetFocus($id: ID!, $bearing: Float) {
+  setHullPlatingFocus(id: $id, bearing: $bearing)
+}

@@ -1,0 +1,3 @@
+mutation HullPlatingSetPulse($id: ID!, $pulse: Boolean!) {
+  setHullPlatingPulse(id: $id, pulse: $pulse)
+}

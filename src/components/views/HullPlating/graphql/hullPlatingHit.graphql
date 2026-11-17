@@ -1,0 +1,8 @@
+mutation HullPlatingHit(
+  $id: ID!
+  $type: HULL_PLATING_MODE
+  $bearing: Float
+  $intensity: Float
+) {
+  hullPlatingHit(id: $id, type: $type, bearing: $bearing, intensity: $intensity)
+}

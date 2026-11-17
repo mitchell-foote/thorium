@@ -1,41 +1,321 @@
-.card-hullPlating {
-  display: block;
+// Mode colors, matching canvas/types.ts MODE_RGB
+$kinetic: rgb(255, 176, 64);
+$energy: rgb(90, 180, 255);
+$radiation: rgb(110, 255, 150);
 
-  .effective-chart {
-    border: white solid 0.25rem;
+@mixin mode-color {
+  &.mode-kinetic {
+    --plating-color: #{$kinetic};
+  }
+  &.mode-energy {
+    --plating-color: #{$energy};
+  }
+  &.mode-radiation {
+    --plating-color: #{$radiation};
+  }
+}
+
+.card-hullPlating {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  h4 {
+    margin: 0 0 6px;
+    font-size: 1em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: 0.75;
   }
 
-  .hull-plating-img-parent {
-    width: 100%;
+  .hull-plating-content {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .hull-plating-main,
+  .hull-plating-controls {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    height: 100%;
+    gap: 12px;
+  }
+
+  // Ship canvas
+  .hull-plating-ship {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .hull-plating-canvas-element {
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(140, 190, 230, 0.3);
+    border-radius: 6px;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(20, 34, 52, 0.7) 0%,
+      rgba(5, 9, 18, 0.92) 100%
+    );
+
+    &.is-interactive {
+      touch-action: none;
+      cursor: crosshair;
+    }
+  }
+
+  .hull-plating-status {
+    @include mode-color;
+    position: absolute;
+    // Top-left corner, clear of the bearing ring
+    top: 10px;
+    left: 14px;
+    font-size: 1.15em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--plating-color, #fff);
+    pointer-events: none;
+  }
+
+  .hull-plating-reinforce {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 12px;
+    border: 1px solid rgba(140, 190, 230, 0.3);
+    border-radius: 6px;
+    background: rgba(5, 9, 18, 0.6);
+
+    small {
+      display: block;
+      opacity: 0.65;
+    }
+  }
+
+  // Hold-to-engage
+  .hull-plating-hold {
+    position: relative;
+    width: 100%;
+    padding: 18px 12px;
+    overflow: hidden;
+    border: 2px solid #4da3ff;
+    border-radius: 6px;
+    background: rgba(40, 110, 200, 0.25);
+    color: #fff;
+    font-size: 1.3em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    touch-action: none;
+    user-select: none;
+    cursor: pointer;
+
+    &.is-engaged {
+      border-color: #ff5a4d;
+      background: rgba(200, 50, 40, 0.25);
+
+      .hull-plating-hold-fill {
+        background: rgba(255, 90, 77, 0.65);
+      }
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .hull-plating-hold-fill {
+    position: absolute;
+    inset: 0;
+    background: rgba(77, 163, 255, 0.65);
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  .hull-plating-hold-label {
     position: relative;
   }
 
-  .hull-plating-activate-btn-parent {
-    position: absolute;
-    top: 80%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 10rem;
+  // Armor type tiles
+  .hull-plating-modes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
-  .activate-btn {
+  .hull-plating-mode {
+    @include mode-color;
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    text-align: left;
+    white-space: normal;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-left: 6px solid var(--plating-color);
+    border-radius: 6px;
+    background: rgba(5, 9, 18, 0.6);
+    opacity: 0.7;
+    cursor: pointer;
+    transition: opacity 0.2s, background 0.2s, box-shadow 0.2s;
+
+    &:focus {
+      outline: none;
+    }
+
+    &.is-active {
+      opacity: 1;
+      border-color: var(--plating-color);
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 12px -2px var(--plating-color);
+    }
+  }
+
+  .hull-plating-mode-name {
+    display: block;
+    font-size: 1.15em;
+    color: var(--plating-color);
+  }
+
+  .hull-plating-mode-description {
+    display: block;
+    font-size: 0.85em;
+    opacity: 0.85;
+  }
+
+  // Effectiveness readout
+  .hull-plating-effect {
+    @include mode-color;
+    flex: 1;
+    min-height: 90px;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    padding: 8px 12px;
+    border: 1px solid rgba(140, 190, 230, 0.3);
+    border-radius: 6px;
+    background: rgba(5, 9, 18, 0.6);
+  }
+
+  .hull-plating-effect-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .hull-plating-effect-value {
+    font-size: 1.6em;
+    color: var(--plating-color, #fff);
+  }
+
+  .hull-plating-wave {
+    flex: 1;
+    min-height: 0;
     width: 100%;
   }
+}
 
-  .hull-plating-buttons-parent {
+.core-hullPlating {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .core-hullPlating-row {
     display: flex;
-    justify-content: space-between;
-    flex-direction: column;
-    gap: 10rem;
+    align-items: center;
+    gap: 6px;
+
+    label {
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .btn {
+      flex: 1;
+    }
   }
 
-  .mode-btns {
+  .core-hullPlating-slider {
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    white-space: nowrap;
+
+    input {
+      flex: 1;
+      min-width: 40px;
+    }
+
+    strong {
+      min-width: 3em;
+      text-align: right;
+    }
   }
+
+  .core-hullPlating-hit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    > .core-hullPlating-hit-settings {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      label {
+        margin: 0;
+      }
+    }
+  }
+
+  // The aiming pad: click around the ship to hit it from that side
+  .core-hullPlating-pad {
+    flex: 0 0 110px;
+    width: 110px;
+    height: 110px;
+    cursor: crosshair;
+    user-select: none;
+
+    .core-hullPlating-pad-ring {
+      fill: rgba(0, 0, 0, 0.35);
+      stroke: rgba(255, 255, 255, 0.25);
+      stroke-width: 1;
+    }
+
+    image {
+      pointer-events: none;
+    }
+
+    .core-hullPlating-pad-last {
+      animation: core-hullPlating-pad-last 4s ease-out forwards;
+    }
+  }
+}
+
+@keyframes core-hullPlating-pad-last {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.25;
+  }
+}
+
+// Arrow pointing at a side of the ship image (see DirectionArrow.tsx)
+.hull-plating-arrow {
+  display: inline-block;
+  width: 1.2em;
+  text-align: center;
+  font-size: 1.5em;
+  font-weight: bold;
+  line-height: 1;
+  vertical-align: middle;
 }

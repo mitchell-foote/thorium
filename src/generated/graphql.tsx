@@ -1682,6 +1682,23 @@ export type HullPlating = SystemInterface & {
   engaged?: Maybe<Scalars['Boolean']>;
   mode?: Maybe<Hull_Plating_Mode>;
   pulse?: Maybe<Scalars['Boolean']>;
+  effectiveness?: Maybe<Scalars['Float']>;
+  autoEffectiveness?: Maybe<Scalars['Boolean']>;
+  focusBearing?: Maybe<Scalars['Float']>;
+  maxEffectiveness?: Maybe<Scalars['Float']>;
+  recoveryTime?: Maybe<Scalars['Float']>;
+  hitType?: Maybe<Hull_Plating_Mode>;
+  hitIntensity?: Maybe<Scalars['Float']>;
+  battleConnected?: Maybe<Scalars['Boolean']>;
+};
+
+export type HullPlatingPing = {
+  __typename?: 'HullPlatingPing';
+  id: Scalars['ID'];
+  hitType: Hull_Plating_Mode;
+  bearing: Scalars['Float'];
+  absorbed: Scalars['Float'];
+  intensity: Scalars['Float'];
 };
 
 export enum Isochip_States {
@@ -2629,6 +2646,29 @@ export type Mutation = {
   setHullPlatingMode?: Maybe<Scalars['String']>;
   setHullPlatingEngaged?: Maybe<Scalars['String']>;
   setHullPlatingPulse?: Maybe<Scalars['String']>;
+  setHullPlatingAutoEffectiveness?: Maybe<Scalars['String']>;
+  /**
+   * Bearing in degrees clockwise from the top of the ship's top-view image
+   * as shown on screen. Null balances the plating.
+   */
+  setHullPlatingFocus?: Maybe<Scalars['String']>;
+  /** The most effective (0 to 1) the plating is allowed to become. */
+  setHullPlatingMaxEffectiveness?: Maybe<Scalars['String']>;
+  /** Seconds the plating takes to recover after a hit knocks it down. */
+  setHullPlatingRecoveryTime?: Maybe<Scalars['String']>;
+  setHullPlatingHitType?: Maybe<Scalars['String']>;
+  /** How hard hits land, 0 to 1. Used when a hit doesn't give its own intensity. */
+  setHullPlatingHitIntensity?: Maybe<Scalars['String']>;
+  /** Whether battle core projectiles that reach the ship also hit the plating. */
+  setHullPlatingBattleConnected?: Maybe<Scalars['String']>;
+  /**
+   * Lands a hit on the hull plating: shows the impact on the hull plating
+   * screens and lowers effectiveness by what the plating failed to stop. Type
+   * and intensity default to the hit settings on the core. Bearing is degrees
+   * clockwise from the top of the ship's top-view image and defaults to a
+   * random direction.
+   */
+  hullPlatingHit?: Maybe<Scalars['String']>;
   addInterface?: Maybe<Scalars['String']>;
   renameInterface?: Maybe<Scalars['String']>;
   removeInterface?: Maybe<Scalars['String']>;
@@ -4973,6 +5013,56 @@ export type MutationSetHullPlatingEngagedArgs = {
 export type MutationSetHullPlatingPulseArgs = {
   id: Scalars['ID'];
   pulse?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type MutationSetHullPlatingAutoEffectivenessArgs = {
+  id: Scalars['ID'];
+  auto: Scalars['Boolean'];
+};
+
+
+export type MutationSetHullPlatingFocusArgs = {
+  id: Scalars['ID'];
+  bearing?: Maybe<Scalars['Float']>;
+};
+
+
+export type MutationSetHullPlatingMaxEffectivenessArgs = {
+  id: Scalars['ID'];
+  max: Scalars['Float'];
+};
+
+
+export type MutationSetHullPlatingRecoveryTimeArgs = {
+  id: Scalars['ID'];
+  seconds: Scalars['Float'];
+};
+
+
+export type MutationSetHullPlatingHitTypeArgs = {
+  id: Scalars['ID'];
+  type: Hull_Plating_Mode;
+};
+
+
+export type MutationSetHullPlatingHitIntensityArgs = {
+  id: Scalars['ID'];
+  intensity: Scalars['Float'];
+};
+
+
+export type MutationSetHullPlatingBattleConnectedArgs = {
+  id: Scalars['ID'];
+  connected: Scalars['Boolean'];
+};
+
+
+export type MutationHullPlatingHitArgs = {
+  id: Scalars['ID'];
+  type?: Maybe<Hull_Plating_Mode>;
+  bearing?: Maybe<Scalars['Float']>;
+  intensity?: Maybe<Scalars['Float']>;
 };
 
 
@@ -11009,6 +11099,7 @@ export type Subscription = {
   advancedNavStarsUpdate: AdvancedNavStarsData;
   googleSheetsUpdate?: Maybe<Array<Maybe<GoogleSheets>>>;
   hullPlatingUpdate: Array<HullPlating>;
+  hullPlatingPing?: Maybe<HullPlatingPing>;
   interfaceUpdate?: Maybe<Array<Maybe<Interface>>>;
   internalCommUpdate?: Maybe<Array<Maybe<InternalComm>>>;
   inventoryUpdate?: Maybe<Array<Maybe<InventoryItem>>>;
@@ -11309,6 +11400,11 @@ export type SubscriptionGoogleSheetsUpdateArgs = {
 
 export type SubscriptionHullPlatingUpdateArgs = {
   simulatorId?: Maybe<Scalars['ID']>;
+};
+
+
+export type SubscriptionHullPlatingPingArgs = {
+  simulatorId: Scalars['ID'];
 };
 
 
@@ -14303,6 +14399,180 @@ export type HackingUpdateFilesMutationVariables = Exact<{
 export type HackingUpdateFilesMutation = (
   { __typename?: 'Mutation' }
   & Pick<Mutation, 'computerCoreUpdateHackingFiles'>
+);
+
+export type HullPlatingDataFragment = (
+  { __typename?: 'HullPlating' }
+  & Pick<HullPlating, 'id' | 'simulatorId' | 'name' | 'displayName' | 'engaged' | 'mode' | 'pulse' | 'effectiveness' | 'autoEffectiveness' | 'focusBearing' | 'maxEffectiveness' | 'recoveryTime' | 'hitType' | 'hitIntensity' | 'battleConnected'>
+  & { power?: Maybe<(
+    { __typename?: 'Power' }
+    & Pick<Power, 'power' | 'powerLevels'>
+  )>, damage?: Maybe<(
+    { __typename?: 'Damage' }
+    & Pick<Damage, 'damaged' | 'report'>
+  )> }
+);
+
+export type HullPlatingsQueryVariables = Exact<{
+  simulatorId: Scalars['ID'];
+}>;
+
+
+export type HullPlatingsQuery = (
+  { __typename?: 'Query' }
+  & { hullPlatings?: Maybe<Array<Maybe<(
+    { __typename?: 'HullPlating' }
+    & HullPlatingDataFragment
+  )>>> }
+);
+
+export type HullPlatingsUpdateSubscriptionVariables = Exact<{
+  simulatorId: Scalars['ID'];
+}>;
+
+
+export type HullPlatingsUpdateSubscription = (
+  { __typename?: 'Subscription' }
+  & { hullPlatingUpdate: Array<(
+    { __typename?: 'HullPlating' }
+    & HullPlatingDataFragment
+  )> }
+);
+
+export type HullPlatingHitMutationVariables = Exact<{
+  id: Scalars['ID'];
+  type?: Maybe<Hull_Plating_Mode>;
+  bearing?: Maybe<Scalars['Float']>;
+  intensity?: Maybe<Scalars['Float']>;
+}>;
+
+
+export type HullPlatingHitMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'hullPlatingHit'>
+);
+
+export type HullPlatingPingSubscriptionVariables = Exact<{
+  simulatorId: Scalars['ID'];
+}>;
+
+
+export type HullPlatingPingSubscription = (
+  { __typename?: 'Subscription' }
+  & { hullPlatingPing?: Maybe<(
+    { __typename?: 'HullPlatingPing' }
+    & Pick<HullPlatingPing, 'id' | 'hitType' | 'bearing' | 'absorbed' | 'intensity'>
+  )> }
+);
+
+export type HullPlatingSetAutoEffectivenessMutationVariables = Exact<{
+  id: Scalars['ID'];
+  auto: Scalars['Boolean'];
+}>;
+
+
+export type HullPlatingSetAutoEffectivenessMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'setHullPlatingAutoEffectiveness'>
+);
+
+export type HullPlatingSetEngagedMutationVariables = Exact<{
+  id: Scalars['ID'];
+  engaged: Scalars['Boolean'];
+}>;
+
+
+export type HullPlatingSetEngagedMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'setHullPlatingEngaged'>
+);
+
+export type HullPlatingSetFocusMutationVariables = Exact<{
+  id: Scalars['ID'];
+  bearing?: Maybe<Scalars['Float']>;
+}>;
+
+
+export type HullPlatingSetFocusMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'setHullPlatingFocus'>
+);
+
+export type HullPlatingSetModeMutationVariables = Exact<{
+  id: Scalars['ID'];
+  mode: Hull_Plating_Mode;
+}>;
+
+
+export type HullPlatingSetModeMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'setHullPlatingMode'>
+);
+
+export type HullPlatingSetPulseMutationVariables = Exact<{
+  id: Scalars['ID'];
+  pulse: Scalars['Boolean'];
+}>;
+
+
+export type HullPlatingSetPulseMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'setHullPlatingPulse'>
+);
+
+export type HullPlatingSetMaxEffectivenessMutationVariables = Exact<{
+  id: Scalars['ID'];
+  max: Scalars['Float'];
+}>;
+
+
+export type HullPlatingSetMaxEffectivenessMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'setHullPlatingMaxEffectiveness'>
+);
+
+export type HullPlatingSetRecoveryTimeMutationVariables = Exact<{
+  id: Scalars['ID'];
+  seconds: Scalars['Float'];
+}>;
+
+
+export type HullPlatingSetRecoveryTimeMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'setHullPlatingRecoveryTime'>
+);
+
+export type HullPlatingSetHitTypeMutationVariables = Exact<{
+  id: Scalars['ID'];
+  type: Hull_Plating_Mode;
+}>;
+
+
+export type HullPlatingSetHitTypeMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'setHullPlatingHitType'>
+);
+
+export type HullPlatingSetHitIntensityMutationVariables = Exact<{
+  id: Scalars['ID'];
+  intensity: Scalars['Float'];
+}>;
+
+
+export type HullPlatingSetHitIntensityMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'setHullPlatingHitIntensity'>
+);
+
+export type HullPlatingSetBattleConnectedMutationVariables = Exact<{
+  id: Scalars['ID'];
+  connected: Scalars['Boolean'];
+}>;
+
+
+export type HullPlatingSetBattleConnectedMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'setHullPlatingBattleConnected'>
 );
 
 export type LightingSetEffectMutationVariables = Exact<{
@@ -17678,6 +17948,33 @@ export const CountermeasureFragmentDoc = gql`
   note
 }
     ${CountermeasureModuleFragmentDoc}`;
+export const HullPlatingDataFragmentDoc = gql`
+    fragment HullPlatingData on HullPlating {
+  id
+  simulatorId
+  name
+  displayName
+  power {
+    power
+    powerLevels
+  }
+  damage {
+    damaged
+    report
+  }
+  engaged
+  mode
+  pulse
+  effectiveness
+  autoEffectiveness
+  focusBearing
+  maxEffectiveness
+  recoveryTime
+  hitType
+  hitIntensity
+  battleConnected
+}
+    `;
 export const TemplateFragmentFragmentDoc = gql`
     fragment TemplateFragment on Template {
   id
@@ -19473,6 +19770,142 @@ export function useHackingUpdateFilesMutation(baseOptions?: ApolloReactHooks.Mut
         return ApolloReactHooks.useMutation<HackingUpdateFilesMutation, HackingUpdateFilesMutationVariables>(HackingUpdateFilesDocument, baseOptions);
       }
 export type HackingUpdateFilesMutationHookResult = ReturnType<typeof useHackingUpdateFilesMutation>;
+export const HullPlatingsDocument = gql`
+    query HullPlatings($simulatorId: ID!) {
+  hullPlatings(simulatorId: $simulatorId) {
+    ...HullPlatingData
+  }
+}
+    ${HullPlatingDataFragmentDoc}`;
+export function useHullPlatingsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<HullPlatingsQuery, HullPlatingsQueryVariables>) {
+        return ApolloReactHooks.useQuery<HullPlatingsQuery, HullPlatingsQueryVariables>(HullPlatingsDocument, baseOptions);
+      }
+export type HullPlatingsQueryHookResult = ReturnType<typeof useHullPlatingsQuery>;
+export const HullPlatingsUpdateDocument = gql`
+    subscription HullPlatingsUpdate($simulatorId: ID!) {
+  hullPlatingUpdate(simulatorId: $simulatorId) {
+    ...HullPlatingData
+  }
+}
+    ${HullPlatingDataFragmentDoc}`;
+export function useHullPlatingsUpdateSubscription(baseOptions?: ApolloReactHooks.SubscriptionHookOptions<HullPlatingsUpdateSubscription, HullPlatingsUpdateSubscriptionVariables>) {
+        return ApolloReactHooks.useSubscription<HullPlatingsUpdateSubscription, HullPlatingsUpdateSubscriptionVariables>(HullPlatingsUpdateDocument, baseOptions);
+      }
+export type HullPlatingsUpdateSubscriptionHookResult = ReturnType<typeof useHullPlatingsUpdateSubscription>;
+export const HullPlatingHitDocument = gql`
+    mutation HullPlatingHit($id: ID!, $type: HULL_PLATING_MODE, $bearing: Float, $intensity: Float) {
+  hullPlatingHit(id: $id, type: $type, bearing: $bearing, intensity: $intensity)
+}
+    `;
+export function useHullPlatingHitMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<HullPlatingHitMutation, HullPlatingHitMutationVariables>) {
+        return ApolloReactHooks.useMutation<HullPlatingHitMutation, HullPlatingHitMutationVariables>(HullPlatingHitDocument, baseOptions);
+      }
+export type HullPlatingHitMutationHookResult = ReturnType<typeof useHullPlatingHitMutation>;
+export const HullPlatingPingDocument = gql`
+    subscription HullPlatingPing($simulatorId: ID!) {
+  hullPlatingPing(simulatorId: $simulatorId) {
+    id
+    hitType
+    bearing
+    absorbed
+    intensity
+  }
+}
+    `;
+export function useHullPlatingPingSubscription(baseOptions?: ApolloReactHooks.SubscriptionHookOptions<HullPlatingPingSubscription, HullPlatingPingSubscriptionVariables>) {
+        return ApolloReactHooks.useSubscription<HullPlatingPingSubscription, HullPlatingPingSubscriptionVariables>(HullPlatingPingDocument, baseOptions);
+      }
+export type HullPlatingPingSubscriptionHookResult = ReturnType<typeof useHullPlatingPingSubscription>;
+export const HullPlatingSetAutoEffectivenessDocument = gql`
+    mutation HullPlatingSetAutoEffectiveness($id: ID!, $auto: Boolean!) {
+  setHullPlatingAutoEffectiveness(id: $id, auto: $auto)
+}
+    `;
+export function useHullPlatingSetAutoEffectivenessMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<HullPlatingSetAutoEffectivenessMutation, HullPlatingSetAutoEffectivenessMutationVariables>) {
+        return ApolloReactHooks.useMutation<HullPlatingSetAutoEffectivenessMutation, HullPlatingSetAutoEffectivenessMutationVariables>(HullPlatingSetAutoEffectivenessDocument, baseOptions);
+      }
+export type HullPlatingSetAutoEffectivenessMutationHookResult = ReturnType<typeof useHullPlatingSetAutoEffectivenessMutation>;
+export const HullPlatingSetEngagedDocument = gql`
+    mutation HullPlatingSetEngaged($id: ID!, $engaged: Boolean!) {
+  setHullPlatingEngaged(id: $id, engaged: $engaged)
+}
+    `;
+export function useHullPlatingSetEngagedMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<HullPlatingSetEngagedMutation, HullPlatingSetEngagedMutationVariables>) {
+        return ApolloReactHooks.useMutation<HullPlatingSetEngagedMutation, HullPlatingSetEngagedMutationVariables>(HullPlatingSetEngagedDocument, baseOptions);
+      }
+export type HullPlatingSetEngagedMutationHookResult = ReturnType<typeof useHullPlatingSetEngagedMutation>;
+export const HullPlatingSetFocusDocument = gql`
+    mutation HullPlatingSetFocus($id: ID!, $bearing: Float) {
+  setHullPlatingFocus(id: $id, bearing: $bearing)
+}
+    `;
+export function useHullPlatingSetFocusMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<HullPlatingSetFocusMutation, HullPlatingSetFocusMutationVariables>) {
+        return ApolloReactHooks.useMutation<HullPlatingSetFocusMutation, HullPlatingSetFocusMutationVariables>(HullPlatingSetFocusDocument, baseOptions);
+      }
+export type HullPlatingSetFocusMutationHookResult = ReturnType<typeof useHullPlatingSetFocusMutation>;
+export const HullPlatingSetModeDocument = gql`
+    mutation HullPlatingSetMode($id: ID!, $mode: HULL_PLATING_MODE!) {
+  setHullPlatingMode(id: $id, mode: $mode)
+}
+    `;
+export function useHullPlatingSetModeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<HullPlatingSetModeMutation, HullPlatingSetModeMutationVariables>) {
+        return ApolloReactHooks.useMutation<HullPlatingSetModeMutation, HullPlatingSetModeMutationVariables>(HullPlatingSetModeDocument, baseOptions);
+      }
+export type HullPlatingSetModeMutationHookResult = ReturnType<typeof useHullPlatingSetModeMutation>;
+export const HullPlatingSetPulseDocument = gql`
+    mutation HullPlatingSetPulse($id: ID!, $pulse: Boolean!) {
+  setHullPlatingPulse(id: $id, pulse: $pulse)
+}
+    `;
+export function useHullPlatingSetPulseMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<HullPlatingSetPulseMutation, HullPlatingSetPulseMutationVariables>) {
+        return ApolloReactHooks.useMutation<HullPlatingSetPulseMutation, HullPlatingSetPulseMutationVariables>(HullPlatingSetPulseDocument, baseOptions);
+      }
+export type HullPlatingSetPulseMutationHookResult = ReturnType<typeof useHullPlatingSetPulseMutation>;
+export const HullPlatingSetMaxEffectivenessDocument = gql`
+    mutation HullPlatingSetMaxEffectiveness($id: ID!, $max: Float!) {
+  setHullPlatingMaxEffectiveness(id: $id, max: $max)
+}
+    `;
+export function useHullPlatingSetMaxEffectivenessMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<HullPlatingSetMaxEffectivenessMutation, HullPlatingSetMaxEffectivenessMutationVariables>) {
+        return ApolloReactHooks.useMutation<HullPlatingSetMaxEffectivenessMutation, HullPlatingSetMaxEffectivenessMutationVariables>(HullPlatingSetMaxEffectivenessDocument, baseOptions);
+      }
+export type HullPlatingSetMaxEffectivenessMutationHookResult = ReturnType<typeof useHullPlatingSetMaxEffectivenessMutation>;
+export const HullPlatingSetRecoveryTimeDocument = gql`
+    mutation HullPlatingSetRecoveryTime($id: ID!, $seconds: Float!) {
+  setHullPlatingRecoveryTime(id: $id, seconds: $seconds)
+}
+    `;
+export function useHullPlatingSetRecoveryTimeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<HullPlatingSetRecoveryTimeMutation, HullPlatingSetRecoveryTimeMutationVariables>) {
+        return ApolloReactHooks.useMutation<HullPlatingSetRecoveryTimeMutation, HullPlatingSetRecoveryTimeMutationVariables>(HullPlatingSetRecoveryTimeDocument, baseOptions);
+      }
+export type HullPlatingSetRecoveryTimeMutationHookResult = ReturnType<typeof useHullPlatingSetRecoveryTimeMutation>;
+export const HullPlatingSetHitTypeDocument = gql`
+    mutation HullPlatingSetHitType($id: ID!, $type: HULL_PLATING_MODE!) {
+  setHullPlatingHitType(id: $id, type: $type)
+}
+    `;
+export function useHullPlatingSetHitTypeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<HullPlatingSetHitTypeMutation, HullPlatingSetHitTypeMutationVariables>) {
+        return ApolloReactHooks.useMutation<HullPlatingSetHitTypeMutation, HullPlatingSetHitTypeMutationVariables>(HullPlatingSetHitTypeDocument, baseOptions);
+      }
+export type HullPlatingSetHitTypeMutationHookResult = ReturnType<typeof useHullPlatingSetHitTypeMutation>;
+export const HullPlatingSetHitIntensityDocument = gql`
+    mutation HullPlatingSetHitIntensity($id: ID!, $intensity: Float!) {
+  setHullPlatingHitIntensity(id: $id, intensity: $intensity)
+}
+    `;
+export function useHullPlatingSetHitIntensityMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<HullPlatingSetHitIntensityMutation, HullPlatingSetHitIntensityMutationVariables>) {
+        return ApolloReactHooks.useMutation<HullPlatingSetHitIntensityMutation, HullPlatingSetHitIntensityMutationVariables>(HullPlatingSetHitIntensityDocument, baseOptions);
+      }
+export type HullPlatingSetHitIntensityMutationHookResult = ReturnType<typeof useHullPlatingSetHitIntensityMutation>;
+export const HullPlatingSetBattleConnectedDocument = gql`
+    mutation HullPlatingSetBattleConnected($id: ID!, $connected: Boolean!) {
+  setHullPlatingBattleConnected(id: $id, connected: $connected)
+}
+    `;
+export function useHullPlatingSetBattleConnectedMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<HullPlatingSetBattleConnectedMutation, HullPlatingSetBattleConnectedMutationVariables>) {
+        return ApolloReactHooks.useMutation<HullPlatingSetBattleConnectedMutation, HullPlatingSetBattleConnectedMutationVariables>(HullPlatingSetBattleConnectedDocument, baseOptions);
+      }
+export type HullPlatingSetBattleConnectedMutationHookResult = ReturnType<typeof useHullPlatingSetBattleConnectedMutation>;
 export const LightingSetEffectDocument = gql`
     mutation LightingSetEffect($simulatorId: ID!, $effect: LIGHTING_ACTION!, $duration: Float!) {
   lightingSetEffect(

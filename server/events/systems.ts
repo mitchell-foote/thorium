@@ -104,7 +104,10 @@ const sendUpdate = sys => {
     );
   if (sys.class === "Crm") pubsub.publish("crmUpdate", sys);
   if (sys.class === "HullPlating") {
-    pubsub.publish("hullPlatingUpdate", sys);
+    pubsub.publish(
+      "hullPlatingUpdate",
+      App.systems.filter(s => s.type === "HullPlating"),
+    );
   }
   if (sys.class === "AdvancedNavigationAndAstrometrics") {
     pubsub.publish("advancedNavAndAstrometricsUpdate", sys);

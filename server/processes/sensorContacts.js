@@ -110,9 +110,17 @@ const moveSensorContactTimed = () => {
               // Projectile destruction
               // Trigger an event so we can capture it for
               // triggers.
+              // The bearing it came in on (0 = top of the grid, clockwise)
+              // lets the hull plating show the hit on the right side.
+              const from = c.location || {x: 0, y: 0};
+              const bearing =
+                from.x || from.y
+                  ? ((Math.atan2(from.x, -from.y) * 180) / Math.PI + 360) % 360
+                  : null;
               App.handleEvent(
                 {
                   simulatorId: sensors.simulatorId,
+                  bearing,
                 },
                 "sensorsProjectileHit",
               );

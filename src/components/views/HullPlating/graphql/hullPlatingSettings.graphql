@@ -1,0 +1,19 @@
+mutation HullPlatingSetMaxEffectiveness($id: ID!, $max: Float!) {
+  setHullPlatingMaxEffectiveness(id: $id, max: $max)
+}
+
+mutation HullPlatingSetRecoveryTime($id: ID!, $seconds: Float!) {
+  setHullPlatingRecoveryTime(id: $id, seconds: $seconds)
+}
+
+mutation HullPlatingSetHitType($id: ID!, $type: HULL_PLATING_MODE!) {
+  setHullPlatingHitType(id: $id, type: $type)
+}
+
+mutation HullPlatingSetHitIntensity($id: ID!, $intensity: Float!) {
+  setHullPlatingHitIntensity(id: $id, intensity: $intensity)
+}
+
+mutation HullPlatingSetBattleConnected($id: ID!, $connected: Boolean!) {
+  setHullPlatingBattleConnected(id: $id, connected: $connected)
+}

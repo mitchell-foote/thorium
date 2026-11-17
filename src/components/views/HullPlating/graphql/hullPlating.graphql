@@ -1,0 +1,37 @@
+fragment HullPlatingData on HullPlating {
+  id
+  simulatorId
+  name
+  displayName
+  power {
+    power
+    powerLevels
+  }
+  damage {
+    damaged
+    report
+  }
+  engaged
+  mode
+  pulse
+  effectiveness
+  autoEffectiveness
+  focusBearing
+  maxEffectiveness
+  recoveryTime
+  hitType
+  hitIntensity
+  battleConnected
+}
+
+query HullPlatings($simulatorId: ID!) {
+  hullPlatings(simulatorId: $simulatorId) {
+    ...HullPlatingData
+  }
+}
+
+subscription HullPlatingsUpdate($simulatorId: ID!) {
+  hullPlatingUpdate(simulatorId: $simulatorId) {
+    ...HullPlatingData
+  }
+}

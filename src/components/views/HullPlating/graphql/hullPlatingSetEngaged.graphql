@@ -1,0 +1,3 @@
+mutation HullPlatingSetEngaged($id: ID!, $engaged: Boolean!) {
+  setHullPlatingEngaged(id: $id, engaged: $engaged)
+}

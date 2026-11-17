@@ -1,0 +1,3 @@
+mutation HullPlatingSetMode($id: ID!, $mode: HULL_PLATING_MODE!) {
+  setHullPlatingMode(id: $id, mode: $mode)
+}

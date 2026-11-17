@@ -1,0 +1,3 @@
+mutation HullPlatingSetAutoEffectiveness($id: ID!, $auto: Boolean!) {
+  setHullPlatingAutoEffectiveness(id: $id, auto: $auto)
+}

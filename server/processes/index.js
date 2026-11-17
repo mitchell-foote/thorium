@@ -20,5 +20,6 @@ import "./systems";
 import "./advanced-nav";
 import "./helium";
 import "./aegis";
+import "./hullPlating";
 import "./trainingTacticalGoal";
 import "./fabrication";
